@@ -60,7 +60,7 @@ select IntToBase36(0);
 select IntToBase36(35);
 select IntToBase36(36);
 select IntToBase36(36*36*36*36*36 + 21);
-select Base36ToInt()IntToBase36(9223372036854775807));
+select Base36ToInt(IntToBase36(9223372036854775807));
 
 select Base36ToInt(null::varchar);
 select Base36ToInt('');
@@ -143,3 +143,40 @@ select vertica_log(using parameters txn = 'a000000071e534', debug='y') over() li
 select vertica_log(using parameters contains = 'RebalanceCluster', debug='y') over() limit 10;
 select vertica_log(using parameters time_start = '03:02', udx = 'y', debug='y') over() limit 10;
 
+select lina_interpolate(null::array[float], array[3.0,4.0], 2.0);
+select lina_interpolate(array[3.0,4.0], null::array[float], 2.0);
+select lina_interpolate(array[1.0, 2.0], array[3.0,4.0], null::float);
+
+select lina_interpolate(array[1.0, 2.0], array[3.0], 2.0);
+
+select lina_interpolate(array[], array[3.0], 1.0);
+select lina_interpolate(array[1.0], array[3.0], 1.0);
+
+select lina_interpolate(array[1.0, 2.0], array[3.0,4.0], 0.0);
+select lina_interpolate(array[1.0, 2.0], array[3.0,4.0], 1.0);
+select lina_interpolate(array[1.0, 2.0], array[3.0,4.0], 1.5);
+select lina_interpolate(array[1.0, 2.0], array[3.0,4.0], 2.0);
+select lina_interpolate(array[1.0, 2.0], array[3.0,4.0], 3.0);
+
+select lina_interpolate(array[1.0, 2.0, 4.0], array[3.0,4.0, 5.0], 1.5);
+select lina_interpolate(array[1.0, 2.0, 4.0], array[3.0,4.0, 5.0], 2.5);
+
+select lina_arr_make(2.0 using parameters elements=10);
+
+select lina_arr_neg(array[1.0, 2.0, 4.4]);
+
+select lina_arr_add(array[1.0, 2.0, 4.4], 3.0);
+select lina_arr_sub(array[1.0, 2.0, 4.4], 3.0);
+select lina_arr_mul(array[1.0, 2.0, 4.4], 3.0);
+select lina_arr_div(array[1.0, 2.0, 4.4], 3.0);
+select lina_arr_div(array[1.0, 2.0, 4.4], 0.0);
+
+select lina_arr_add(3.0, array[1.0, 2.0, 4.4]);
+select lina_arr_sub(3.0, array[1.0, 2.0, 4.4]);
+select lina_arr_mul(3.0, array[1.0, 2.0, 4.4]);
+select lina_arr_div(3.0, array[1.0, 2.0, 4.4]);
+
+select lina_arr_add(array[1.0, 2.0, 4.4], array[2.0, 5.0, 7.4]);
+select lina_arr_sub(array[1.0, 2.0, 4.4], array[2.0, 5.0, 7.4]);
+select lina_arr_mul(array[1.0, 2.0, 4.4], array[2.0, 5.0, 7.4]);
+select lina_arr_div(array[1.0, 2.0, 4.4], array[2.0, 5.0, 7.4]);

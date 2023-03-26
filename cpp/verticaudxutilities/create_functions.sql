@@ -33,6 +33,25 @@ create           function sql_digest              as language 'C++' name 'SQLDig
 create transform function vertica_log             as language 'C++' name 'VerticaLogFactory'              library VerticaUDxUtilities          fenced;
 create transform function vertica_log_size        as language 'C++' name 'VerticaLogSizeFactory'          library VerticaUDxUtilities          fenced;
 
+create           function lina_interpolate        as language 'C++' name 'ArrayLinearInterpolateFactory'  library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_make           as language 'C++' name 'ArrayMakeFactory'               library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_neg            as language 'C++' name 'ArrayNegFactory'                library VerticaUDxUtilities :fencing fenced;
+
+create           function lina_arr_add            as language 'C++' name 'ArrayAddFactory'                library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_sub            as language 'C++' name 'ArraySubFactory'                library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_mul            as language 'C++' name 'ArrayMulFactory'                library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_div            as language 'C++' name 'ArrayDivFactory'                library VerticaUDxUtilities :fencing fenced;
+
+create           function lina_arr_add            as language 'C++' name 'ArrayAdd0Factory'               library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_sub            as language 'C++' name 'ArraySub0Factory'               library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_mul            as language 'C++' name 'ArrayMul0Factory'               library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_div            as language 'C++' name 'ArrayDiv0Factory'               library VerticaUDxUtilities :fencing fenced;
+
+create           function lina_arr_add            as language 'C++' name 'ArrayAdd1Factory'               library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_sub            as language 'C++' name 'ArraySub1Factory'               library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_mul            as language 'C++' name 'ArrayMul1Factory'               library VerticaUDxUtilities :fencing fenced;
+create           function lina_arr_div            as language 'C++' name 'ArrayDiv1Factory'               library VerticaUDxUtilities :fencing fenced;
+
 grant execute on all functions in schema public to public;
 \set ON_ERROR_STOP off
 

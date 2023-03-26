@@ -14,14 +14,16 @@ ssh -o ConnectTimeout=1 dbadmin@$deploy_to hostname > /dev/null
 echo Deploying SKIP_BUILD=$SKIP_BUILD BUILD=$BUILD build_flags ${build_flags} to $deploy_to fencing $fencing
 
 if [[ -z "${SKIP_BUILD}" ]]; then
-  echo Build without docker
   ${root_dir}/build.sh ${build_flags}
   [[ $? != 0 ]] && echo Error in build && exit 1
 fi
 
 [[ -f test_queries.sql ]] && tqf=test_queries.sql
 
-echo Deploying "$(ls -la BUILD/${BUILD}/${libname}.so)"
+
+echo Stripping "$(ls -la ${root_dir}/BUILD/${BUILD}/${libname}.so)"
+strip ${root_dir}/BUILD/${BUILD}/${libname}.so
+echo Deploying "$(ls -la ${root_dir}/BUILD/${BUILD}/${libname}.so)"
 scp -o ConnectTimeout=1 ${root_dir}/BUILD/${BUILD}/${libname}.so create_functions.sql ${tqf} dbadmin@${deploy_to}:/tmp
 [[ $? != 0 ]] && exit 1
 

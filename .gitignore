@@ -1,0 +1,8 @@
+BUILD
+CMakeFiles
+*.o
+.idea
+cmake-build-debug
+cmake-build-release
+vertica.ini
+python/*/venv/
