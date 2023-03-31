@@ -212,28 +212,28 @@ create table '{new_schema}.{new_table}' like '{schema}.{table}' including projec
 
 SQL_COLUMNS = """
 select column_name, data_type, is_nullable from columns
-where lower(table_schema) = '{schema}' 
-and lower(table_name) = '{table}' 
+where lower(table_schema) = lower('{schema}') 
+and lower(table_name) = lower('{table}') 
 order by ordinal_position;
 """
 
 SQL_TABLE = """
 select partition_expression, partition_group_expression from tables 
-where lower(table_schema) = '{schema}' and lower(table_name) = '{table}';
+where lower(table_schema) = lower('{schema}') and lower(table_name) = lower('{table}');
 """
 
 SQL_PROJECTION = """
 select lower(projection_name), segment_expression from projections
-where lower(projection_schema) = '{schema}'
-and lower(anchor_table_name) = '{table}'
+where lower(projection_schema) = lower('{schema}')
+and lower(anchor_table_name) = lower('{table}')
 order by projection_name
 limit 1;
 """
 
 SQL_PROJECTION_COLUMNS = """
 select table_column_name, sort_position, encoding_type from projection_columns
-where lower(table_schema) = '{schema}'
-and lower(projection_name) = '{projection}'
+where lower(table_schema) = lower('{schema}')
+and lower(projection_name) = lower('{projection}')
 order by column_position;
 """
 
@@ -356,8 +356,8 @@ class Table:
         rs_split = result_lines[0].split('|')
         if len(rs_split) != 2:
             raise ValueError("Bad result from query " + result_lines[0])
-        self.partition_expression = rs_split[0].replace(self.table + ".", "")
-        self.group_partition_expression = rs_split[1].replace(self.table + ".", "")
+        self.partition_expression = rs_split[0].lower().replace(self.table.lower() + ".", "")
+        self.group_partition_expression = rs_split[1].lower().replace(self.table.lower() + ".", "")
         logging.debug("Partition expression " + self.partition_expression + " group " + self.group_partition_expression)
 
     def getProjection(self):
@@ -671,6 +671,39 @@ class VerticaTableRedesign:
             table_list.append(table)
         return schema, table, global_schema
 
+    def tableURL(self):
+        if not self.copy_sample_data:
+            return
+        t1 = None
+        t2 = None
+        t3 = None
+        if self.sample_table:
+            t1 = self.sample_table
+        if self.order_segment_table:
+            if t1:
+                t2 = self.order_segment_table
+            else:
+                t1 = self.optimised_table
+        if self.optimised_table:
+            if not t1:
+                return
+            if t2:
+                t3 = self.optimised_table
+            else:
+                t2 = self.optimised_table
+        if not t1 or not t2:
+            return
+        query_no = "2"
+        if t3:
+            query_no = "3"
+        link = "https://webapps.virtu.com/vertex/vertica/query?db=" \
+               + self.db_connect.db_name + "&query=size-columns-" + query_no + "-tables" \
+               + "&schema=" + t1.schema + "&table=" + t1.table \
+               + "&schema2=" + t2.schema + "&table2=" + t2.table
+        if t3:
+            link += "&schema3=" + t2.schema + "&table3=" + t3.table
+        print(link)
+
     def run(self):
         if self.generate_source_ddl:
             if not self.source_table:
@@ -790,6 +823,7 @@ class VerticaTableRedesign:
             self.optimised_table.copyData(table_info.schema, table_info.table, None, None)
 
         logging.info("Done")
+        self.tableURL()
 
 
 def argvToArgs():
