@@ -29,14 +29,10 @@ void BinaryToCharFactory::getPerInstanceResources(Vertica::ServerInterface& srvI
 }
 
 void BinaryToChar::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
-  try {
-    do {
-      res_writer.getStringRef().copy(arg_reader.getStringRef(0));
-      res_writer.next();
-    } while ( arg_reader.next() );
-  } catch(const std::exception& e) {
-      vt_report_error(0, "Exception: [%s]", e.what());
-  }
+  do {
+    res_writer.getStringRef().copy(arg_reader.getStringRef(0));
+    res_writer.next();
+  } while ( arg_reader.next() );
 }
 
 RegisterFactory(BinaryToCharFactory);
@@ -67,14 +63,10 @@ void CharToBinaryFactory::getPerInstanceResources(Vertica::ServerInterface& srvI
 }
 
 void CharToBinary::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
-  try {
-    do {
-      res_writer.getStringRef().copy(arg_reader.getStringRef(0));
-      res_writer.next();
-    } while ( arg_reader.next() );
-  } catch(const std::exception& e) {
-      vt_report_error(0, "Exception: [%s]", e.what());
-  }
+  do {
+    res_writer.getStringRef().copy(arg_reader.getStringRef(0));
+    res_writer.next();
+  } while ( arg_reader.next() );
 }
 
 RegisterFactory(CharToBinaryFactory);

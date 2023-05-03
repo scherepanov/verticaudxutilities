@@ -50,13 +50,4 @@ std::string UDxUtilities::getColumnNameFromArg(const Vertica::SizedColumnTypes &
   return name;
 }
 
-RegisterLibrary("Sergey Cherepanov",
-                "11/12/2022",
-                "4.0",
-                "11.1.1",
-                "",
-                "Vertica UDx Utilities",
-                "",
-                "");
-
 } // namespaces VerticaUDxUtilities

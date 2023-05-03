@@ -22,16 +22,12 @@ RegisterFactory(RowCountFactory);
 
 void RowCount::processPartition(Vertica::ServerInterface &srvInterface, Vertica::PartitionReader &inputReader, Vertica::PartitionWriter &outputWriter) {
   long row_count = 0;
-  try {
-    do {
-      row_count++;
-    } while ( inputReader.next() );
-    outputWriter.getStringRef(0).copy(srvInterface.getCurrentNodeName().c_str());
-    outputWriter.setInt(1, row_count);
-    outputWriter.next();
-  } catch(const std::exception& e) {
-    vt_report_error(0, "Exception: [%s]", e.what());
-  }
+  do {
+    row_count++;
+  } while ( inputReader.next() );
+  outputWriter.getStringRef(0).copy(srvInterface.getCurrentNodeName().c_str());
+  outputWriter.setInt(1, row_count);
+  outputWriter.next();
 }
 
 } // namespaces VerticaUDxUtilities

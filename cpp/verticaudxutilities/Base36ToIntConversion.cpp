@@ -77,14 +77,10 @@ void Base36ToIntFactory::getPerInstanceResources(Vertica::ServerInterface& srvIn
 }
 
 void Base36ToInt::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
-  try {
-    do {
-      convertBase36ToInt(arg_reader, res_writer);
-      res_writer.next();
-    } while ( arg_reader.next() );
-  } catch(const std::exception& e) {
-      vt_report_error(0, "Exception: [%s]", e.what());
-  }
+  do {
+    convertBase36ToInt(arg_reader, res_writer);
+    res_writer.next();
+  } while ( arg_reader.next() );
 }
 
 RegisterFactory(Base36ToIntFactory);
@@ -115,14 +111,10 @@ void IntToBase36Factory::getPerInstanceResources(Vertica::ServerInterface& srvIn
 }
 
 void IntToBase36::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
-  try {
-    do {
-      convertIntIoBase36(arg_reader, res_writer);
-      res_writer.next();
-    } while ( arg_reader.next() );
-  } catch(const std::exception& e) {
-      vt_report_error(0, "Exception: [%s]", e.what());
-  }
+  do {
+    convertIntIoBase36(arg_reader, res_writer);
+    res_writer.next();
+  } while ( arg_reader.next() );
 }
 
 RegisterFactory(IntToBase36Factory);

@@ -60,78 +60,74 @@ void Seq::processPartition(Vertica::ServerInterface &srvInterface, Vertica::Part
   bool incr_present = arg_cols.size() == 3;
   const Vertica::VerticaType& seq_type = meta.getColumnType(arg_cols[0]);
 
-  try {
-    do {
-      if(debug) srvInterface.log("Input argument loop");
-      if(seq_type.isInt() || seq_type.isTimestamp() || seq_type.isTimestampTz() || seq_type.isTime() || seq_type.isDate()) {
-        if(debug) srvInterface.log("Input arguments int, timestamp, TimestampTz, time or date");
-        Vertica::vint first = inputReader.getIntRef(arg_cols[0]);
-        Vertica::vint last = inputReader.getIntRef(arg_cols[1]);
-        Vertica::vint incr;
-        if(incr_present) {
-          incr = inputReader.getIntRef(arg_cols[2]);
-        } else {
-          incr = (first < last ? 1 : -1 );
-          if(!seq_type.isInt() && !seq_type.isDate() && !seq_type.isFloat()) {
-            incr *= 1000000;
-          }
-        }
-        if(incr == 0) {
-          vt_report_error( 10, "Zero increment" );
-        }
-        if( (first < last && incr < 0) || (first > last && incr > 0) ) {
-          incr = -incr;
-        }
-        if(debug) srvInterface.log("Seq first %lli last %lli incr %lli", first, last, incr);
-        Vertica::vint lp = first;
-        do {
-          if(seq_type.isInt()) {
-            outputWriter.setInt(0, lp);
-          } else if (seq_type.isTimestamp()) {
-            outputWriter.setTimestamp(0, lp);
-          } else if (seq_type.isTimestampTz()) {
-            outputWriter.setTimestampTz(0, lp);
-          } else if (seq_type.isTime()) {
-            outputWriter.setTime(0, lp);
-          } else if (seq_type.isDate()) {
-            outputWriter.setDate(0, lp);
-          }
-          //if(debug) srvInterface.log("Output seq %lli", lp);
-          outputWriter.next();
-          lp += incr;
-        } while ((incr > 0 && lp <= last) || (incr < 0 && lp >= last));
-      } else if (seq_type.isFloat()) {
-        if(debug) srvInterface.log("Input arguments float");
-        Vertica::vfloat first = inputReader.getFloatRef(arg_cols[0]);
-        Vertica::vfloat last = inputReader.getFloatRef(arg_cols[1]);
-        Vertica::vfloat incr;
-        if(incr_present) {
-          incr = inputReader.getFloatRef(arg_cols[2]);
-        } else {
-          incr = (first < last ? 1 : -1 );
-        }
-        if(incr == 0)
-          vt_report_error(10, "Zero increment");
-        if( (first < last && incr < 0) || (first > last && incr > 0) ) {
-          incr = -incr;
-        }
-        if(debug) srvInterface.log("Seq first %f last %f incr %f", first, last, incr);
-        Vertica::vfloat lp =first;
-        do {
-          outputWriter.setFloat(0, static_cast<double>(lp));
-          //if(debug) srvInterface.log("Output seq %f", lp);
-          outputWriter.next();
-          lp += incr;
-        } while ((incr > 0 && lp <= last) || (incr < 0 && lp >= last));
-
+  do {
+    if(debug) srvInterface.log("Input argument loop");
+    if(seq_type.isInt() || seq_type.isTimestamp() || seq_type.isTimestampTz() || seq_type.isTime() || seq_type.isDate()) {
+      if(debug) srvInterface.log("Input arguments int, timestamp, TimestampTz, time or date");
+      Vertica::vint first = inputReader.getIntRef(arg_cols[0]);
+      Vertica::vint last = inputReader.getIntRef(arg_cols[1]);
+      Vertica::vint incr;
+      if(incr_present) {
+        incr = inputReader.getIntRef(arg_cols[2]);
       } else {
-        if(debug) srvInterface.log("Unsupported argument type");
-        vt_report_error(20,"Unsupported argument type");
+        incr = (first < last ? 1 : -1 );
+        if(!seq_type.isInt() && !seq_type.isDate() && !seq_type.isFloat()) {
+          incr *= 1000000;
+        }
       }
-    } while ( inputReader.next() );
-  } catch(const std::exception& e) {
-    vt_report_error(0, "Exception: [%s]", e.what());
-  }
+      if(incr == 0) {
+        vt_report_error( 10, "Zero increment" );
+      }
+      if( (first < last && incr < 0) || (first > last && incr > 0) ) {
+        incr = -incr;
+      }
+      if(debug) srvInterface.log("Seq first %lli last %lli incr %lli", first, last, incr);
+      Vertica::vint lp = first;
+      do {
+        if(seq_type.isInt()) {
+          outputWriter.setInt(0, lp);
+        } else if (seq_type.isTimestamp()) {
+          outputWriter.setTimestamp(0, lp);
+        } else if (seq_type.isTimestampTz()) {
+          outputWriter.setTimestampTz(0, lp);
+        } else if (seq_type.isTime()) {
+          outputWriter.setTime(0, lp);
+        } else if (seq_type.isDate()) {
+          outputWriter.setDate(0, lp);
+        }
+        //if(debug) srvInterface.log("Output seq %lli", lp);
+        outputWriter.next();
+        lp += incr;
+      } while ((incr > 0 && lp <= last) || (incr < 0 && lp >= last));
+    } else if (seq_type.isFloat()) {
+      if(debug) srvInterface.log("Input arguments float");
+      Vertica::vfloat first = inputReader.getFloatRef(arg_cols[0]);
+      Vertica::vfloat last = inputReader.getFloatRef(arg_cols[1]);
+      Vertica::vfloat incr;
+      if(incr_present) {
+        incr = inputReader.getFloatRef(arg_cols[2]);
+      } else {
+        incr = (first < last ? 1 : -1 );
+      }
+      if(incr == 0)
+        vt_report_error(10, "Zero increment");
+      if( (first < last && incr < 0) || (first > last && incr > 0) ) {
+        incr = -incr;
+      }
+      if(debug) srvInterface.log("Seq first %f last %f incr %f", first, last, incr);
+      Vertica::vfloat lp =first;
+      do {
+        outputWriter.setFloat(0, static_cast<double>(lp));
+        //if(debug) srvInterface.log("Output seq %f", lp);
+        outputWriter.next();
+        lp += incr;
+      } while ((incr > 0 && lp <= last) || (incr < 0 && lp >= last));
+
+    } else {
+      if(debug) srvInterface.log("Unsupported argument type");
+      vt_report_error(20,"Unsupported argument type");
+    }
+  } while ( inputReader.next() );
 }
 
 RegisterFactory(SeqFactory);

@@ -188,44 +188,40 @@ void SQLDigest::setup(Vertica::ServerInterface &srvInterface, const Vertica::Siz
 }
 
 void SQLDigest::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
-  try {
-    do {
-      if(arg_reader.isNull(0)) {
-        res_writer.setNull();
-      } else {
-        const Vertica::VString& source_str = arg_reader.getStringRef(0);
-        if(debug) {
-          srvInterface.log("Source str %s", source_str.data());
-        }
-        staticStr(source_str);
-        if(debug) {
-          srvInterface.log("Static str %s len %ld", buffer_str.data(), buffer_str_len);
-        }
-        if(only_static_str) {
-          res_writer.getStringRef(0).copy(buffer_str.data(), buffer_str_len);
-          res_writer.next();
-          continue;
-        }
-        staticInt();
-        if(debug) {
-          srvInterface.log("Static int %s len %ld", buffer_int.data(), buffer_int_len);
-        }
-        if(only_static_int) {
-          res_writer.getStringRef(0).copy(buffer_int.data(), buffer_int_len);
-          res_writer.next();
-          continue;
-        }
-        uint64_t hash = staticHash();
-        if(debug) {
-          srvInterface.log("Hash %ld", hash);
-        }
-        res_writer.setInt(static_cast<long>(hash));
+  do {
+    if(arg_reader.isNull(0)) {
+      res_writer.setNull();
+    } else {
+      const Vertica::VString& source_str = arg_reader.getStringRef(0);
+      if(debug) {
+        srvInterface.log("Source str %s", source_str.data());
       }
-      res_writer.next();
-    } while ( arg_reader.next() );
-  } catch(const std::exception& e) {
-    vt_report_error(0, "Exception: [%s]", e.what());
-  }
+      staticStr(source_str);
+      if(debug) {
+        srvInterface.log("Static str %s len %ld", buffer_str.data(), buffer_str_len);
+      }
+      if(only_static_str) {
+        res_writer.getStringRef(0).copy(buffer_str.data(), buffer_str_len);
+        res_writer.next();
+        continue;
+      }
+      staticInt();
+      if(debug) {
+        srvInterface.log("Static int %s len %ld", buffer_int.data(), buffer_int_len);
+      }
+      if(only_static_int) {
+        res_writer.getStringRef(0).copy(buffer_int.data(), buffer_int_len);
+        res_writer.next();
+        continue;
+      }
+      uint64_t hash = staticHash();
+      if(debug) {
+        srvInterface.log("Hash %ld", hash);
+      }
+      res_writer.setInt(static_cast<long>(hash));
+    }
+    res_writer.next();
+  } while ( arg_reader.next() );
 }
 
 RegisterFactory(SQLDigestFactory);

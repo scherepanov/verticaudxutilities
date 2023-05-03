@@ -65,30 +65,25 @@ void Args::processPartition(Vertica::ServerInterface &srvInterface, Vertica::Par
   if(delay_ms != 0) {
     usleep(delay_ms * 1000);
   }
-  try {
-    std::vector<size_t> arg_cols;
-    Vertica::SizedColumnTypes meta = inputReader.getTypeMetaData();
-    meta.getArgumentColumns(arg_cols);
-    do {
-      for (int repeat_ind = 0; repeat_ind < repeat; repeat_ind++) {
-        size_t col_idx = 0;
-        for( const auto& col : arg_cols ) {
-          outputWriter.copyFromInput( col_idx, inputReader, col );
-          col_idx++;
-        }
-        if( info ) {
-          outputWriter.getStringRef( col_idx++ ).copy( srvInterface.getCurrentNodeName().c_str() );
-          outputWriter.setInt( col_idx++, instance_no );
-          outputWriter.setInt( col_idx++, active_instance_count );
-          outputWriter.setInt( col_idx, inr );
-        }
-        outputWriter.next();
+  std::vector<size_t> arg_cols;
+  Vertica::SizedColumnTypes meta = inputReader.getTypeMetaData();
+  meta.getArgumentColumns(arg_cols);
+  do {
+    for (int repeat_ind = 0; repeat_ind < repeat; repeat_ind++) {
+      size_t col_idx = 0;
+      for( const auto& col : arg_cols ) {
+        outputWriter.copyFromInput( col_idx, inputReader, col );
+        col_idx++;
       }
-    } while ( inputReader.next() );
-  } catch(const std::exception& e) {
-    instances_running--;
-    vt_report_error(0, "Exception: [%s]", e.what());
-  }
+      if( info ) {
+        outputWriter.getStringRef( col_idx++ ).copy( srvInterface.getCurrentNodeName().c_str() );
+        outputWriter.setInt( col_idx++, instance_no );
+        outputWriter.setInt( col_idx++, active_instance_count );
+        outputWriter.setInt( col_idx, inr );
+      }
+      outputWriter.next();
+    }
+  } while ( inputReader.next() );
   instances_running--;
 }
 

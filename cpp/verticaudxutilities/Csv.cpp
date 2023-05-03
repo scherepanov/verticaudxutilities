@@ -204,13 +204,6 @@ void Csv::processPartition(Vertica::ServerInterface &srvInterface, Vertica::Part
         if(file_line.length() > static_cast<size_t>(max_row_length))
           vt_report_error(14, "Row length in file %i exceeds max_row_length %i", file_line.length(), max_row_length);
         line_no++;
-        if(line_no%10000 == 0) {
-          if(isCanceled()) {
-            if(debug)
-              srvInterface.log("Got cancelled");
-            return;
-          }
-        }
         if(line_no <= static_cast<size_t>(skip_rows))
           continue;
         long col_ind = 0;
