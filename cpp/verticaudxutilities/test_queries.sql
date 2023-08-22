@@ -29,23 +29,30 @@ select mpargs(seq using parameters info='y') over() from
 select mpargs(seq using parameters info='y') over(partition by seq) from
 (select seq(1,100) over()) v;
 
-select to_int(current_date), to_int(current_time::time), to_int(current_timestamp::timestamp), to_int(current_timestamp::timestamp - '2015-01-01'::timestamp);
+select to_int(current_date), to_int(current_time::time), to_int(current_timestamp::timestamp),to_int(current_timestamp),
+       to_int(current_timestamp::timestamp - '2015-01-01'::timestamp), to_int(current_time);
 
-select to_int(null::date), to_int(null::time), to_int(null::timestamp), to_int(null::interval);
+select to_int(null::date), to_int(null::time), to_int(null::timestamp), to_int(null::interval), to_int(null::intervalym),
+    to_int(null::timetz), to_int(null::timestamptz);
 
+select to_numeric(current_date) a, to_numeric(current_time::time), to_numeric(current_timestamp::timestamp::timestamp),
+       to_numeric(current_time), to_numeric(current_timestamp::timestamp),
+       to_numeric(current_timestamp - '2015-01-01'::timestamp);
 
-select to_numeric(current_date) a, to_numeric(current_time), to_numeric(current_timestamp), to_numeric(current_timestamp - '2015-01-01'::timestamp);
-select to_numeric(null::date) a, to_numeric(null::time), to_numeric(null::timestamp), to_numeric(null::interval);
+select to_numeric(null::date) a, to_numeric(null::time), to_numeric(null::timestamp),  to_int(null::intervalym),
+       to_int(null::timetz), to_int(null::timestamptz), to_numeric(null::interval);
 
 select midnight_nanos(current_time::time, 10), midnight_nanos(current_timestamp::timestamp, 11);
 select midnight_nanos(null::time, 10), midnight_nanos(current_time::time, null::int), midnight_nanos(null::time, null::int),
 midnight_nanos(null::timestamp, 10), midnight_nanos(current_timestamp::time, null::int), midnight_nanos(null::timestamp, null::int);
 
-
 select todate(1);
 select toDate(null::int);
 select totime(1);
 select totime(null::int);
+
+select totimetz(1);
+select totimetz(null::int);
 
 select totimestamp(10000001);
 select totimestamp(null::int);
@@ -53,24 +60,7 @@ select totimestamp(null::int);
 select totimestamptz(10000001);
 select totimestamptz(null::int);
 
-select CharToBin('Bin to Char is OK'::varchar(20));
-select BinToChar(CharToBin('Char to Bin -> Bin to Char is OK'::varchar(30)));
-
-select IntToBase36(null::int);
-select IntToBase36(0);
-select IntToBase36(35);
-select IntToBase36(36);
-select IntToBase36(36*36*36*36*36 + 21);
-select Base36ToInt(IntToBase36(9223372036854775807));
-
-select Base36ToInt(null::varchar);
-select Base36ToInt('');
-select IntToBase36(Base36ToInt('10'));
-select Base36ToInt('3PZZZZZZZZZZ');
-
-select Base36ToInt('1Y2P0IJ32E8E7');
-select IntToBase36(Base36ToInt('1Y2P0IJ32E8E7'));
-
+select '00:00:00'::timetz, to_char('00:00:00'::timetz);
 
 select current_date, UnixDaysToDate(DateToUnixDays(current_date)), DateToUnixDays(current_date);
 select current_timestamp::timestamp, UnixMicrosToTimestamp(TimestampToUnixMicros(current_timestamp::timestamp)), TimestampToUnixMicros(current_timestamp::timestamp);
@@ -99,8 +89,31 @@ select NanosSinceEpoch('2022-03-11'::date, null::time, 789);
 select NanosSinceEpoch('2022-03-11'::date, '11:05:45.123456'::time, null::int);
 select NanosSinceEpoch(null::date, null::time, null::int);
 
+select MidnightMicrosToTime(123);
+select MidnightMicrosToTimeTz(123);
+Select TimeToMidnightMicros('12:34:56.789123'::time);
+Select TimeTzToMidnightMicros('12:34:56.789123'::timetz);
+
 select current_timestamp::timestamp, to_int(current_timestamp::timestamp) vertica_epoch, to_int(current_timestamp::timestamp) + to_int('2000-01-01'::timestamp - '1970-01-01'::timestamp) unix_epoch,
  TimestampToUnixMicros(current_timestamp::timestamp) unix_micros;
+
+select CharToBin('Bin to Char is OK'::varchar(20));
+select BinToChar(CharToBin('Char to Bin -> Bin to Char is OK'::varchar(30)));
+
+select IntToBase36(null::int);
+select IntToBase36(0);
+select IntToBase36(35);
+select IntToBase36(36);
+select IntToBase36(36*36*36*36*36 + 21);
+select Base36ToInt(IntToBase36(9223372036854775807));
+
+select Base36ToInt(null::varchar);
+select Base36ToInt('');
+select IntToBase36(Base36ToInt('10'));
+select Base36ToInt('3PZZZZZZZZZZ');
+
+select Base36ToInt('1Y2P0IJ32E8E7');
+select IntToBase36(Base36ToInt('1Y2P0IJ32E8E7'));
 
 select RowCount(v.*) over() from (select 1)v;
 

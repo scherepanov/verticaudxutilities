@@ -46,7 +46,7 @@ While for most functions public grants are correct, you may consider limiting ac
 
 ## Functionality
 
-[Missing Conversion Functions](docs/MISSING_FUNCTIONS.md)
+[Date Time Conversions](docs/DATE_TIME_CONVERSIONS.md)
 
 For vaious reasons, Vertica is missing few conversion functions. 
 

@@ -5,7 +5,12 @@ namespace VerticaUDxUtilities {
 
 class ToInt : public Vertica::ScalarFunction {
   public:
+    ToInt();
+  public:
+    void setup(	Vertica::ServerInterface& 	srvInterface, const Vertica::SizedColumnTypes&	argTypes ) override;
     void processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) override;
+  private:
+    bool time_tz;
 };
 
 class ToIntFactory : public Vertica::ScalarFunctionFactory {
@@ -21,7 +26,12 @@ class ToIntFactory : public Vertica::ScalarFunctionFactory {
 
 class ToNumeric : public Vertica::ScalarFunction {
   public:
+    ToNumeric();
+  public:
+    void setup(	Vertica::ServerInterface& 	srvInterface, const Vertica::SizedColumnTypes&	argTypes ) override;
     void processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) override;
+  private:
+    bool time_tz;
 };
 
 class ToNumericFactory : public Vertica::ScalarFunctionFactory {
@@ -210,6 +220,39 @@ public:
   Vertica::ScalarFunction *createScalarFunction(Vertica::ServerInterface &srvInterface) override;
   void getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) override;
 };
+
+class MidnightMicrosToTimeTz : public Vertica::ScalarFunction {
+public:
+  void processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) override;
+};
+
+class MidnightMicrosToTimeTzFactory : public Vertica::ScalarFunctionFactory {
+public:
+  MidnightMicrosToTimeTzFactory();
+
+public:
+  void getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType) override;
+  void getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes) override;
+  Vertica::ScalarFunction *createScalarFunction(Vertica::ServerInterface &srvInterface) override;
+  void getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) override;
+};
+
+class TimeTzToMidnightMicros : public Vertica::ScalarFunction {
+public:
+  void processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) override;
+};
+
+class TimeTzToMidnightMicrosFactory : public Vertica::ScalarFunctionFactory {
+public:
+  TimeTzToMidnightMicrosFactory();
+
+public:
+  void getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType) override;
+  void getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes) override;
+  Vertica::ScalarFunction *createScalarFunction(Vertica::ServerInterface &srvInterface) override;
+  void getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) override;
+};
+
 
 class UnixMicrosToDate : public Vertica::ScalarFunction {
 public:

@@ -25,6 +25,8 @@ create or replace           function UnixMicrosToTimestamp   as language 'C++' n
 create or replace           function TimestampToUnixMicros   as language 'C++' name 'TimestampToUnixMicrosFactory'   library VerticaUDxUtilities :fencing fenced;
 create or replace           function MidnightMicrosToTime    as language 'C++' name 'MidnightMicrosToTimeFactory'    library VerticaUDxUtilities :fencing fenced;
 create or replace           function TimeToMidnightMicros    as language 'C++' name 'TimeToMidnightMicrosFactory'    library VerticaUDxUtilities :fencing fenced;
+create or replace           function MidnightMicrosToTimeTz  as language 'C++' name 'MidnightMicrosToTimeTzFactory'  library VerticaUDxUtilities :fencing fenced;
+create or replace           function TimeTzToMidnightMicros  as language 'C++' name 'TimeTzToMidnightMicrosFactory'  library VerticaUDxUtilities :fencing fenced;
 
 create or replace           function UnixMicrosToDate        as language 'C++' name 'UnixMicrosToDateFactory'        library VerticaUDxUtilities :fencing fenced;
 

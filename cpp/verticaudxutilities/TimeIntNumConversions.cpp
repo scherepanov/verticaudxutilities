@@ -33,11 +33,31 @@ void ToIntFactory::getPerInstanceResources(Vertica::ServerInterface& srvInterfac
   res.scratchMemory = 0;
 }
 
+ToInt::ToInt() :
+time_tz(false)
+{}
+
+void ToInt::setup(	Vertica::ServerInterface& 	srvInterface, const Vertica::SizedColumnTypes&	argTypes ) {
+  time_tz = argTypes.getColumnType(0).isTimeTz();
+}
+
 void ToInt::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
-  do {
-    res_writer.setInt(arg_reader.getIntRef(0));
-    res_writer.next();
-  } while ( arg_reader.next() );
+  if (time_tz) {
+    do {
+      if(arg_reader.getTimeTzRef(0) == Vertica::vint_null) {
+        res_writer.setInt(Vertica::vint_null);
+      } else {
+        const auto tzi = arg_reader.getIntRef(0);
+        res_writer.setInt((tzi >> 24 & 0xffffffffff) - ((tzi & 0xffffff) - (24 * 3600)) * 1000000);
+      }
+      res_writer.next();
+    } while (arg_reader.next());
+  } else {
+    do {
+      res_writer.setInt(arg_reader.getIntRef(0));
+      res_writer.next();
+    } while (arg_reader.next());
+  }
 }
 
 RegisterFactory(ToIntFactory);
@@ -71,6 +91,14 @@ void ToNumericFactory::getPerInstanceResources(Vertica::ServerInterface& srvInte
   res.scratchMemory = 0;
 }
 
+ToNumeric::ToNumeric() :
+  time_tz(false)
+{}
+
+void ToNumeric::setup(	Vertica::ServerInterface& 	srvInterface, const Vertica::SizedColumnTypes&	argTypes ) {
+  time_tz = argTypes.getColumnType(0).isTimeTz();
+}
+
 void ToNumeric::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
   int scale = 6;
   if (arg_reader.getTypeMetaData().getColumnType(0).isDate()) {
@@ -81,6 +109,9 @@ void ToNumeric::processBlock(Vertica::ServerInterface &srvInterface, Vertica::Bl
     if (tm == Vertica::vint_null) {
       res_writer.getNumericRef().setNull();
     } else {
+      if (time_tz) {
+        tm = (tm << 24) & 0xffffffff;
+      }
       Vertica::VNumeric vnum(reinterpret_cast<Vertica::uint64 *>(&tm), 18, scale);
       res_writer.getNumericRef().copy(&vnum);
     }
@@ -162,7 +193,7 @@ ToTimeTZFactory::ToTimeTZFactory(){
 
 void ToTimeTZFactory::getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType){
   argTypes.addInt();
-  returnType.addTime();
+  returnType.addTimeTz();
 }
 
 void ToTimeTZFactory::getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes){
@@ -180,7 +211,11 @@ void ToTimeTZFactory::getPerInstanceResources(Vertica::ServerInterface& srvInter
 
 void ToTimeTZ::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
   do {
-    res_writer.setTimeTz(arg_reader.getIntRef(0));
+    if(arg_reader.getIntRef(0) == Vertica::vint_null) {
+      res_writer.setInt(Vertica::vint_null);
+    } else {
+      res_writer.setTimeTz((arg_reader.getIntRef(0) << 24) + 24 * 3600);
+    }
     res_writer.next();
   } while ( arg_reader.next() );
 }
@@ -464,6 +499,79 @@ void TimeToMidnightMicros::processBlock(Vertica::ServerInterface &srvInterface, 
 
 RegisterFactory(TimeToMidnightMicrosFactory);
 
+MidnightMicrosToTimeTzFactory::MidnightMicrosToTimeTzFactory(){
+  strict = Vertica::RETURN_NULL_ON_NULL_INPUT;
+  vol = Vertica::IMMUTABLE;
+}
+
+void MidnightMicrosToTimeTzFactory::getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType){
+  argTypes.addInt();
+  returnType.addTimeTz();
+}
+
+void MidnightMicrosToTimeTzFactory::getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes){
+  outputTypes.addTimeTz(6, UDxUtilities::getColumnNameFromArg(inputTypes, 0, "midnight_micros_to_timetz"));
+}
+
+Vertica::ScalarFunction * MidnightMicrosToTimeTzFactory::createScalarFunction(Vertica::ServerInterface &srvInterface){
+  return vt_createFuncObj(srvInterface.allocator, MidnightMicrosToTimeTz);
+}
+
+void MidnightMicrosToTimeTzFactory::getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) {
+  res.nFileHandles = 0;
+  res.scratchMemory = 0;
+}
+
+void MidnightMicrosToTimeTz::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
+  do {
+    if(arg_reader.getIntRef(0) == Vertica::vint_null) {
+      res_writer.setInt(Vertica::vint_null);
+    } else {
+      res_writer.setTimeTz((arg_reader.getIntRef(0) << 24) + 24 * 3600);
+    }
+    res_writer.next();
+  } while ( arg_reader.next() );
+}
+
+RegisterFactory(MidnightMicrosToTimeTzFactory);
+
+TimeTzToMidnightMicrosFactory::TimeTzToMidnightMicrosFactory(){
+  strict = Vertica::RETURN_NULL_ON_NULL_INPUT;
+  vol = Vertica::IMMUTABLE;
+}
+
+void TimeTzToMidnightMicrosFactory::getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType){
+  argTypes.addTimeTz();
+  returnType.addInt();
+}
+
+void TimeTzToMidnightMicrosFactory::getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes){
+  outputTypes.addInt(UDxUtilities::getColumnNameFromArg(inputTypes, 0, "timetz_to_midnight_micros"));
+}
+
+Vertica::ScalarFunction * TimeTzToMidnightMicrosFactory::createScalarFunction(Vertica::ServerInterface &srvInterface){
+  return vt_createFuncObj(srvInterface.allocator, TimeTzToMidnightMicros);
+}
+
+void TimeTzToMidnightMicrosFactory::getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) {
+  res.nFileHandles = 0;
+  res.scratchMemory = 0;
+}
+
+void TimeTzToMidnightMicros::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
+  do {
+    if(arg_reader.getTimeRef(0) == Vertica::vint_null) {
+      res_writer.setInt(Vertica::vint_null);
+    } else {
+      const auto tzi = arg_reader.getIntRef(0);
+      res_writer.setInt((tzi >> 24 & 0xffffffffff) - ((tzi & 0xffffff) - (24 * 3600)) * 1000000);
+    }
+    res_writer.next();
+  } while ( arg_reader.next() );
+}
+
+RegisterFactory(TimeTzToMidnightMicrosFactory);
+
 UnixMicrosToDateFactory::UnixMicrosToDateFactory(){
   strict = Vertica::RETURN_NULL_ON_NULL_INPUT;
   vol = Vertica::IMMUTABLE;
@@ -631,8 +739,8 @@ void MidnightNanosFactory::getReturnType(Vertica::ServerInterface &srvInterface,
   std::vector<size_t> arg_cols;
   inputTypes.getArgumentColumns(arg_cols);
 
-  Vertica::VerticaType ts_type = inputTypes.getColumnType(arg_cols[0]);
-  Vertica::VerticaType ns_type = inputTypes.getColumnType(arg_cols[1]);
+  const Vertica::VerticaType& ts_type = inputTypes.getColumnType(arg_cols[0]);
+  const Vertica::VerticaType& ns_type = inputTypes.getColumnType(arg_cols[1]);
   if (!ts_type.isTime() and !ts_type.isTimestamp() ) {
     vt_report_error(1, "MidnightNanos expects first argument of type Time ot Timestamp, get %s",
                     ts_type.getTypeStr());
@@ -710,7 +818,6 @@ void MicrosSinceEpoch::processBlock(Vertica::ServerInterface &srvInterface, Vert
 RegisterFactory(MicrosSinceEpochFactory);
 
 NanosSinceEpochFactory::NanosSinceEpochFactory(){
-  strict = Vertica::RETURN_NULL_ON_NULL_INPUT;
   vol = Vertica::IMMUTABLE;
 }
 
@@ -740,8 +847,10 @@ void NanosSinceEpoch::processBlock(Vertica::ServerInterface &srvInterface, Verti
     Vertica::vint days = arg_reader.getIntRef(0);
     Vertica::vint us = arg_reader.getIntRef(1);
     Vertica::vint ns = arg_reader.getIntRef(2);
-    if(days == Vertica::vint_null || us == Vertica::vint_null || ns == Vertica::vint_null) {
+    if(days == Vertica::vint_null || us == Vertica::vint_null) {
       res_writer.setInt(Vertica::vint_null);
+    } else if (ns == Vertica::vint_null) {
+      res_writer.setInt(((days + VERTICA_EPOCH_OFFSET_DAYS) * USEC_PER_DAY + us) * 1000LL);
     } else {
       res_writer.setInt(((days + VERTICA_EPOCH_OFFSET_DAYS) * USEC_PER_DAY + us) * 1000LL + ns);
     }
