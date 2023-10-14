@@ -1,9 +1,10 @@
--- drop table public.vertica_dual_tmp cascade;
+drop table if exists public.vertica_dual_tmp;
 create table public.vertica_dual_tmp
 (n int)
 order by n
 segmented by hash(n) all nodes ksafe 1;
 
+drop table if exists public.vertica_dual;
 create table public.vertica_dual
 (n int,
 node_name varchar(20),
@@ -21,5 +22,5 @@ from public.vertica_dual_tmp) v
 group by node_name
 order by node_name);
 
-drop table public.vertica_dual_tmp cascade;
+drop table public.vertica_dual_tmp;
 grant select on public.vertica_dual to public;

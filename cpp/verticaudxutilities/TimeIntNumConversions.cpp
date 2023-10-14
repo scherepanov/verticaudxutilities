@@ -287,6 +287,74 @@ void ToTimestampTZ::processBlock(Vertica::ServerInterface &srvInterface, Vertica
 
 RegisterFactory(ToTimestampTZFactory);
 
+ToIntervalFactory::ToIntervalFactory(){
+    strict = Vertica::RETURN_NULL_ON_NULL_INPUT;
+    vol = Vertica::IMMUTABLE;
+}
+
+void ToIntervalFactory::getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType){
+    argTypes.addInt();
+    returnType.addInterval();
+}
+
+void ToIntervalFactory::getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes){
+    outputTypes.addInterval(6,
+                            INTERVAL_MASK(Vertica::DAY) | INTERVAL_MASK(Vertica::HOUR) | INTERVAL_MASK(Vertica::MINUTE) | INTERVAL_MASK(Vertica::SECOND),
+                            UDxUtilities::getColumnNameFromArg(inputTypes, 0, "to_interval"));
+}
+
+Vertica::ScalarFunction * ToIntervalFactory::createScalarFunction(Vertica::ServerInterface &srvInterface){
+    return vt_createFuncObj(srvInterface.allocator, ToInterval);
+}
+
+void ToIntervalFactory::getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) {
+    res.nFileHandles = 0;
+    res.scratchMemory = 0;
+}
+
+void ToInterval::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
+    do {
+        res_writer.setInterval(arg_reader.getIntRef(0));
+        res_writer.next();
+    } while ( arg_reader.next() );
+}
+
+RegisterFactory(ToIntervalFactory);
+
+ToIntervalYMFactory::ToIntervalYMFactory(){
+    strict = Vertica::RETURN_NULL_ON_NULL_INPUT;
+    vol = Vertica::IMMUTABLE;
+}
+
+void ToIntervalYMFactory::getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType){
+    argTypes.addInt();
+    returnType.addIntervalYM();
+}
+
+void ToIntervalYMFactory::getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes){
+    outputTypes.addIntervalYM(INTERVAL_MASK(Vertica::YEAR) | INTERVAL_MASK(Vertica::MONTH),
+                              UDxUtilities::getColumnNameFromArg(inputTypes, 0, "to_intervalym"));
+}
+
+Vertica::ScalarFunction * ToIntervalYMFactory::createScalarFunction(Vertica::ServerInterface &srvInterface){
+    return vt_createFuncObj(srvInterface.allocator, ToIntervalYM);
+}
+
+void ToIntervalYMFactory::getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) {
+    res.nFileHandles = 0;
+    res.scratchMemory = 0;
+}
+
+void ToIntervalYM::processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) {
+    do {
+        res_writer.setIntervalYM(arg_reader.getIntRef(0));
+        res_writer.next();
+    } while ( arg_reader.next() );
+}
+
+RegisterFactory(ToIntervalYMFactory);
+
+
 UnixDaysToDateFactory::UnixDaysToDateFactory(){
   strict = Vertica::RETURN_NULL_ON_NULL_INPUT;
   vol = Vertica::IMMUTABLE;

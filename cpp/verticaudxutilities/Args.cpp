@@ -7,7 +7,7 @@ namespace VerticaUDxUtilities {
 static std::atomic_int instance_counter(0);
 static std::atomic_int active_instance_count(0);
 
-Args::Args(): debug(false), info(false), delay_ms(0), repeat(1) {
+Args::Args(): debug(false), info(false), delay_ms(0), repeat(1), order_by_column_count(0) {
   instance_no = instance_counter.fetch_add(1);
   active_instance_count++;
 }
@@ -22,16 +22,33 @@ void ArgsFactory::getPrototype(Vertica::ServerInterface &srvInterface, Vertica::
 }
 
 void ArgsFactory::getParameterType(Vertica::ServerInterface &srvInterface, Vertica::SizedColumnTypes &parameterTypes) {
-  parameterTypes.addVarchar(32, "info");
+  parameterTypes.addBool("info");
   parameterTypes.addInt("delay_ms");
   parameterTypes.addInt("repeat");
+  parameterTypes.addBool("debug");
+  parameterTypes.addInt("order_by_column_count");
 }
 
 void ArgsFactory::getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes){
+  auto params = srvInterface.getParamReader();
+  size_t order_by_column_count = (params.containsParameter("order_by_column_count") ? params.getIntRef( "order_by_column_count" ) : 0);
+  bool debug = params.containsParameter("debug") && params.getBoolRef("debug");
   std::vector<size_t> arg_cols;
   inputTypes.getArgumentColumns(arg_cols);
+  if(order_by_column_count > arg_cols.size()) {
+    vt_report_error(101, "Parameter order_by_column_count %ld exceed number of columns %ld", order_by_column_count, arg_cols.size());
+  }
+  size_t ind = 0;
   for (const auto & col : arg_cols) {
-    outputTypes.addArg(inputTypes.getColumnType(col), inputTypes.getColumnName(col));
+    Vertica::SizedColumnTypes::Properties props;
+    if (ind < order_by_column_count) {
+        if (debug) {
+            srvInterface.log("Adding order by column %s ind %lu", inputTypes.getColumnName(col).c_str(), col);
+        }
+        props.isSortedBy = true;
+    }
+    outputTypes.addArg(inputTypes.getColumnType(col), inputTypes.getColumnName(col), props);
+    ind++;
   }
   if(srvInterface.getParamReader().containsParameter("info")) {
     outputTypes.addVarchar(32, "node_name");
@@ -46,28 +63,31 @@ Vertica::TransformFunction * ArgsFactory::createTransformFunction(Vertica::Serve
 }
 
 void Args::setup(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes){
-  info = srvInterface.getParamReader().containsParameter("info");
-  if(srvInterface.getParamReader().containsParameter("delay_ms")) {
-    delay_ms = srvInterface.getParamReader().getIntRef("delay_ms");
-    if(delay_ms > 10000 || delay_ms < 0)
-      vt_report_error(1, "Delay too long - why you need delay more than 10 sec?");
+  auto params = srvInterface.getParamReader();
+  info = params.containsParameter("info") && params.getBoolRef("info");
+  debug = params.containsParameter("debug") && params.getBoolRef("debug");
+  delay_ms = (params.containsParameter("delay_ms") ? params.getIntRef( "delay_ms" ) : 0);
+  if(delay_ms > 10000 || delay_ms < 0) {
+    vt_report_error(1, "Delay too long - why you need delay more than 10 sec?");
   }
-  if(srvInterface.getParamReader().containsParameter("repeat")) {
-    repeat = srvInterface.getParamReader().getIntRef( "repeat" );
-  }
+  repeat = (params.containsParameter("repeat") ? params.getIntRef( "repeat" ) : 1);
+  order_by_column_count = (params.containsParameter("order_by_column_count") ? params.getIntRef( "order_by_column_count" ) : 0);
 }
 
 void Args::processPartition(Vertica::ServerInterface &srvInterface, Vertica::PartitionReader &inputReader, Vertica::PartitionWriter &outputWriter) {
   static std::atomic_int instances_running(0);
   instances_running++;
   int inr = instances_running;
-  if(debug) srvInterface.log("process partition, instances_running %d", inr);
+  if(debug) {
+    srvInterface.log("process partition start, instances_running %d", inr);
+  }
   if(delay_ms != 0) {
     usleep(delay_ms * 1000);
   }
   std::vector<size_t> arg_cols;
   Vertica::SizedColumnTypes meta = inputReader.getTypeMetaData();
   meta.getArgumentColumns(arg_cols);
+  size_t part_row_cnt = 0;
   do {
     for (int repeat_ind = 0; repeat_ind < repeat; repeat_ind++) {
       size_t col_idx = 0;
@@ -82,8 +102,12 @@ void Args::processPartition(Vertica::ServerInterface &srvInterface, Vertica::Par
         outputWriter.setInt( col_idx, inr );
       }
       outputWriter.next();
+      part_row_cnt++;
     }
   } while ( inputReader.next() );
+  if(debug) {
+    srvInterface.log("process partition   end, instances_running %d, rows processed %ld", inr, part_row_cnt);
+  }
   instances_running--;
 }
 

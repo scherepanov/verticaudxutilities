@@ -60,6 +60,12 @@ select totimestamp(null::int);
 select totimestamptz(10000001);
 select totimestamptz(null::int);
 
+select toInterval(null::int);
+select toInterval(123456789);
+
+select toIntervalYM(null::int);
+select toIntervalYM(123456789);
+
 select '00:00:00'::timetz, to_char('00:00:00'::timetz);
 
 select current_date, UnixDaysToDate(DateToUnixDays(current_date)), DateToUnixDays(current_date);

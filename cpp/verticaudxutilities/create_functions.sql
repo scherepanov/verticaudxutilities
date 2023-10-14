@@ -18,6 +18,8 @@ create or replace           function ToTime                  as language 'C++' n
 create or replace           function ToTimeTZ                as language 'C++' name 'ToTimeTZFactory'                library VerticaUDxUtilities :fencing fenced;
 create or replace           function ToTimestamp             as language 'C++' name 'ToTimestampFactory'             library VerticaUDxUtilities :fencing fenced;
 create or replace           function ToTimestampTZ           as language 'C++' name 'ToTimestampTZFactory'           library VerticaUDxUtilities :fencing fenced;
+create or replace           function ToInterval              as language 'C++' name 'ToIntervalFactory'              library VerticaUDxUtilities :fencing fenced;
+create or replace           function ToIntervalYM            as language 'C++' name 'ToIntervalYMFactory'            library VerticaUDxUtilities :fencing fenced;
 
 create or replace           function UnixDaysToDate          as language 'C++' name 'UnixDaysToDateFactory'          library VerticaUDxUtilities :fencing fenced;
 create or replace           function DateToUnixDays          as language 'C++' name 'DateToUnixDaysFactory'          library VerticaUDxUtilities :fencing fenced;

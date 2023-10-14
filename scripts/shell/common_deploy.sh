@@ -9,7 +9,7 @@ build_flags=" -l -x ${target}"
 [[ "${BUILD}" != Debug ]] && BUILD=Release
 
 [[ ! -z "$1" ]] && deploy_to=$1
-ssh -o ConnectTimeout=1 dbadmin@$deploy_to hostname > /dev/null 
+ssh -o ConnectTimeout=1 -o StrictHostKeyChecking=no dbadmin@$deploy_to hostname > /dev/null 
 [[ $? != 0 ]] && echo Cannot ssh to dbadmin@$deploy_to && exit 1
 echo Deploying SKIP_BUILD=$SKIP_BUILD BUILD=$BUILD build_flags ${build_flags} to $deploy_to fencing $fencing
 

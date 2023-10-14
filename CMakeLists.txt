@@ -24,12 +24,15 @@ MESSAGE(STATUS "Using --c++20")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # set -fPIC
 
 #set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-cpp -Wno-address-of-packed-member -Wno-packed-not-aligned")
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-deprecated-copy")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-deprecated-copy -Wno-cpp")
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-deprecated-copy")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ggdb")
 
 #set(VERTICA_SDK_INCLUDE "/opt/vertica/sdk/include")
-set(VERTICA_SDK_INCLUDE "/home/scherepanov/git/vertica/extern/include/verticaudx/verticaudx12031")
+#set(VERTICA_SDK_INCLUDE "/home/scherepanov/git/vertica/extern/include/verticaudx/verticaudx12031")
+set(VERTICA_SDK_INCLUDE "/home/scherepanov/git/vertica/extern/include/verticaudx/verticaudx120414")
+#set(VERTICA_SDK_INCLUDE "/home/scherepanov/git/vertica/extern/include/verticaudx/verticaudx1102")
 set(VERTICA_SDK_CPP "${VERTICA_SDK_INCLUDE}/Vertica.cpp")
 
 set(VERTICA_LIB_HOME "${CMAKE_SOURCE_DIR}/cpp")

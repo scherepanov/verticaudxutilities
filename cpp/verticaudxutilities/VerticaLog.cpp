@@ -41,7 +41,7 @@ void VerticaLogFactory::getReturnType(Vertica::ServerInterface &srvInterface, co
   if(srvInterface.getParamReader().containsParameter("udx")) {
     outputTypes.addVarchar(16, "lang");
     outputTypes.addVarchar(20, "n_name");
-    outputTypes.addVarchar(16, "pid1");
+    outputTypes.addVarchar(32, "pid1");
     outputTypes.addVarchar(16, "pid2");
     outputTypes.addVarchar(16, "pid3");
     outputTypes.addVarchar(16, "process");

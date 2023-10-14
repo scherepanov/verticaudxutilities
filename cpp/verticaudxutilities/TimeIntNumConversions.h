@@ -125,6 +125,38 @@ class ToTimestampTZFactory : public Vertica::ScalarFunctionFactory {
     void getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) override;
 };
 
+class ToInterval : public Vertica::ScalarFunction {
+public:
+    void processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) override;
+};
+
+class ToIntervalFactory : public Vertica::ScalarFunctionFactory {
+public:
+    ToIntervalFactory();
+
+public:
+    void getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType) override;
+    void getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes) override;
+    Vertica::ScalarFunction *createScalarFunction(Vertica::ServerInterface &srvInterface) override;
+    void getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) override;
+};
+
+class ToIntervalYM : public Vertica::ScalarFunction {
+public:
+    void processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) override;
+};
+
+class ToIntervalYMFactory : public Vertica::ScalarFunctionFactory {
+public:
+    ToIntervalYMFactory();
+
+public:
+    void getPrototype(Vertica::ServerInterface &srvInterface, Vertica::ColumnTypes &argTypes, Vertica::ColumnTypes &returnType) override;
+    void getReturnType(Vertica::ServerInterface &srvInterface, const Vertica::SizedColumnTypes &inputTypes, Vertica::SizedColumnTypes &outputTypes) override;
+    Vertica::ScalarFunction *createScalarFunction(Vertica::ServerInterface &srvInterface) override;
+    void getPerInstanceResources(Vertica::ServerInterface& srvInterface, Vertica::VResources& res) override;
+};
+
 class UnixDaysToDate : public Vertica::ScalarFunction {
 public:
   void processBlock(Vertica::ServerInterface &srvInterface, Vertica::BlockReader &arg_reader, Vertica::BlockWriter &res_writer) override;
