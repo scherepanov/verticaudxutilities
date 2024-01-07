@@ -48,9 +48,9 @@ While for most functions public grants are correct, you may consider limiting ac
 
 [Date Time Conversions](docs/DATE_TIME_CONVERSIONS.md)
 
-For vaious reasons, Vertica is missing few type casts functions. For example, you cannot cast VARBINARY to VARCHAR and reverse. Other missed conversions are between nubmer of micros since epoch/midnight and various Vertica time/timestamp types.
+For vaious reasons, Vertica is missing few conversion functions. 
 
-Date/Time conversions functions change datatype of input argument without and changes to data. It is not a compile-time cast, but stil the very high performing solution.
+For example, there is no conversion betweeen VARBINARY and VARCHAR.
 
 [CSV](docs/CSV.md)
 

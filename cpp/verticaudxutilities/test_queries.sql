@@ -19,8 +19,13 @@ select seq(1.0::float, -3.0::float) over();
 select args(seq) over(partition by seq) from
 (select seq(1,10) over()) v;
 
+select args(seq using parameters order_by_column_count=1) over() from
+    (select seq(1,10) over()) v;
 
-select args(seq using parameters info='y', delay_ms=10) over(partition by seq) from
+--select args(seq using parameters order_by_column_count=1) over() from
+--    (select seq(10,1) over()) v;
+
+select args(seq using parameters info=true) over(partition by seq) from
 (select seq(1,10) over()) v;
 
 select mpargs(seq using parameters info='y') over() from

@@ -16,10 +16,7 @@ class Args : public Vertica::TransformFunction {
   private:
     bool debug;
     bool info;
-    long delay_ms;
-    long repeat;
     long instance_no;
-    size_t order_by_column_count;
 };
 
 class ArgsFactory : public Vertica::TransformFunctionFactory {
