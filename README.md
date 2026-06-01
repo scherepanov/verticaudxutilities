@@ -9,7 +9,6 @@ Library registration claims UDx SDK v 11.1.1, you can build and run starting wit
 Library verified to work up to UDx SDK v 25.2.1.
 You will need to edit library registration and put your Vertica version in cpp/verticaudxutilities/UDxUtilities.cpp.
 
-There is no indications that you will not be able to compile and use library with version 12 and above.
 
 Library compiles with g++ v 10.3 and above, with c++17.
 No need to use docker, most likely it will lower your compiler version.
