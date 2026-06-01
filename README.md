@@ -6,7 +6,7 @@ It also contains few functions that are missed from Vertica for various reasons.
 ## Prerequisites
 
 Library registration claims UDx SDK v 11.1.1, you can build and run starting with Vertica v 9.3.
-Library verified to work up to UDx SDK v 12.0.2-2.
+Library verified to work up to UDx SDK v 25.2.1.
 You will need to edit library registration and put your Vertica version in cpp/verticaudxutilities/UDxUtilities.cpp.
 
 There is no indications that you will not be able to compile and use library with version 12 and above.
